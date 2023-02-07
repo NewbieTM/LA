@@ -1,3 +1,5 @@
+import time
+
 from kivy.app import App
 from kivy.lang import Builder
 from kivy.uix.button import Button
@@ -6,26 +8,30 @@ from bs4 import BeautifulSoup
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.label import Label
+from kivy.uix.textinput import TextInput
 import requests
 
 Builder.load_string('''
 
 # Define the scroll view
 <ScrollableLabel>:
-    Label:
-        canvas.before:
-            Color:
-                rgba: (.93, .91, .67, 1)
-            Rectangle:
-                pos: self.pos
-                size: self.size
+    id: scrlv
+    TextInput:
+        disabled: True
+        disabled_foreground_color: (0,0,0,1)
+        id: tx
+        background_disabled_normal: ''
         padding: (10,10)
-        id: label
-        color: (0,0,0,1)
-        font_size: 40
+        background_color: (.93, .91, .67, 1)
+        font_size: 50
         text_size: self.width, None
-        size_hint_y: None
-        height: self.texture_size[1]
+        size_hint: 1,None
+        height: max(self.minimum_height, scrlv.height)
+        background_active: ''
+        background_normal: ''
+        readonly: True
+        
+        
 <MyGridLayout>:
     spacing: 30
     size_hint_y: None
@@ -38,7 +44,7 @@ Builder.load_string('''
     background_color: (.93, .91, .67, 1)
     background_normal: ''
     color: (0,0,0,1)
-    
+
 <PreviousButton>:
     text: 'Предыдущая стр...'
     font_size: self.width / 9
@@ -48,19 +54,33 @@ Builder.load_string('''
     color: (0,0,0,1)
 <MyLabel>:
     size_hint: 0.01,0.01
-    
+
 ''')
 
 x = 1
 
+class MyTextInput(TextInput):
+    pass
+
+class ScrollableLabel(ScrollView):
+    pass
+
 class MyGridLayout(GridLayout):
     pass
+
+
 class NextButton(Button):
     pass
+
+
 class PreviousButton(Button):
     pass
+
+
 class MyLabel(Label):
     pass
+
+
 class MyButton(Button):
     color = (0, 0, 0, 1)
     valign = 'bottom'
@@ -68,9 +88,6 @@ class MyButton(Button):
     background_color = (.93, .91, .67, 1)
     background_normal = ''
     font_size = 35
-
-class ScrollableLabel(ScrollView):
-    pass
 
 
 
@@ -90,8 +107,7 @@ class Box(BoxLayout):
         self.add_widget(MyButton(text='10 класс', on_press=self.btn_menu))
         self.add_widget(MyButton(text='11 класс', on_press=self.btn_menu))
 
-
-    def btn_menu(self,widget):
+    def btn_menu(self, widget):
         self.clear_widgets()
         self.add_widget(MyButton(text='И. С. Тургенев. Отцы и дети', on_press=self.btn_press))
         self.add_widget(MyButton(text='И. А. Гончаров. Обломов.', on_press=self.btn_press))
@@ -101,7 +117,6 @@ class Box(BoxLayout):
         self.add_widget(MyButton(text='Н. А. Некрасов. Лирика. Кому на Руси жить хорошо...', on_press=self.btn_press))
         self.add_widget(MyButton(text='А. И. Островский. Гроза.', on_press=self.btn_press))
         self.add_widget(MyButton(text='А. П. Чехов. Вишневый сад.', on_press=self.btn_press))
-
 
     def btn_press(self, instance):
         self.clear_widgets()
@@ -114,17 +129,15 @@ class Box(BoxLayout):
         teme = soup.find_all("p", class_="MsoNormal")
         for temes in teme:
             data += temes.text
-        sc.ids.label.text = data
-
+        sc.ids.tx.text = data
         self.add_widget(sc)
-        gd = MyGridLayout(cols = 3)
+        gd = MyGridLayout(cols=3)
         gd.add_widget(PreviousButton(on_press=self.previous_page))
-        gd.add_widget(MyLabel(text = f'стр № {x}',color = (1,1,1,1)))
+        gd.add_widget(MyLabel(text=f'стр № {x}', color=(1, 1, 1, 1)))
         gd.add_widget(NextButton(on_press=self.next_page))
-
         self.add_widget(gd)
 
-    def next_page(self,instance):
+    def next_page(self, instance):
         self.clear_widgets()
         sc = ScrollableLabel()
         data = ''
@@ -136,7 +149,7 @@ class Box(BoxLayout):
         teme = soup.find_all("p", class_="MsoNormal")
         for temes in teme:
             data += temes.text
-        sc.ids.label.text = data
+        sc.ids.tx.text = data
         self.add_widget(sc)
         gd = MyGridLayout(cols=3)
         gd.add_widget(PreviousButton(on_press=self.previous_page))
@@ -145,7 +158,7 @@ class Box(BoxLayout):
 
         self.add_widget(gd)
 
-    def previous_page(self,instance):
+    def previous_page(self, instance):
         self.clear_widgets()
         sc = ScrollableLabel()
         data = ''
@@ -158,7 +171,7 @@ class Box(BoxLayout):
         teme = soup.find_all("p", class_="MsoNormal")
         for temes in teme:
             data += temes.text
-        sc.ids.label.text = data
+        sc.ids.tx.text = data
         self.add_widget(sc)
         gd = MyGridLayout(cols=3)
         gd.add_widget(PreviousButton(on_press=self.previous_page))
@@ -176,5 +189,3 @@ class MyApp(App):
 
 if __name__ == "__main__":
     MyApp().run()
-
-
